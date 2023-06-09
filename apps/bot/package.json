@@ -1,0 +1,21 @@
+{
+  "name": "bot",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx src/index.ts --watch",
+    "build": "tsc",
+    "deploy-commands": "tsx src/deployCommands.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@discordjs/rest": "^1.7.1",
+    "discord.js": "^14.11.0",
+    "dotenv": "^16.1.4",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "tsconfig": "workspace:*",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.3"
+  }
+}
