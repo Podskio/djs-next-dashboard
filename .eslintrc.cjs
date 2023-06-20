@@ -24,7 +24,8 @@ module.exports = {
       files: "apps/web/**",
       plugins: ["react", "react-hooks"],
       extends: [
-        "next",
+        "next/core-web-vitals",
+        "next/babel",
         "plugin:react/recommended",
         "plugin:react-hooks/recommended",
       ],
