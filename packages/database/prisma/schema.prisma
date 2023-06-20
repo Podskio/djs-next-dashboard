@@ -1,6 +1,7 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["jsonProtocol"]
+  output          = "../../../node_modules/!prisma/client"
 }
 
 datasource db {
@@ -9,6 +10,6 @@ datasource db {
 }
 
 model Guild {
-  id   String  @id
-  name String?
+  id             String  @id
+  welcomeMessage String?
 }
