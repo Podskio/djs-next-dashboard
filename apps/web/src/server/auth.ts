@@ -1,13 +1,12 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { type GetServerSidePropsContext } from "next";
+import { type GetServerSidePropsContext, type NextApiRequest } from "next";
 import {
   getServerSession,
-  type NextAuthOptions,
   type DefaultSession,
+  type NextAuthOptions,
 } from "next-auth";
+import { decode } from "next-auth/jwt";
 import DiscordProvider from "next-auth/providers/discord";
 import { env } from "~/env.mjs";
-import { prisma } from "~/server/db";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -19,15 +18,8 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
     } & DefaultSession["user"];
   }
-
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
 }
 
 /**
@@ -37,30 +29,39 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
+    session: ({ session, token }) => ({
       ...session,
       user: {
         ...session.user,
-        id: user.id,
+        id: token.sub,
       },
     }),
+    jwt: ({ token, account }) => {
+      if (account) {
+        // Inserts access token into the jwt so we can use it in discord API requests
+        return {
+          ...token,
+          access_token: account.access_token,
+        };
+      }
+      return token;
+    },
   },
-  adapter: PrismaAdapter(prisma),
   providers: [
     DiscordProvider({
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
+      authorization: {
+        params: {
+          scope: "identify guilds",
+        },
+      },
     }),
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
   ],
+  pages: {
+    signIn: "/guilds",
+    signOut: "/",
+  },
 };
 
 /**
@@ -73,4 +74,17 @@ export const getServerAuthSession = (ctx: {
   res: GetServerSidePropsContext["res"];
 }) => {
   return getServerSession(ctx.req, ctx.res, authOptions);
+};
+
+/**
+ * Helper function to get the discord access token from the session cookie.
+ */
+export const getAccessTokenFromRequest = async (req: NextApiRequest) => {
+  const token = req.cookies["next-auth.session-token"] as string;
+  if (!token) throw new Error("No session token");
+
+  const jwt = await decode({ token, secret: env.NEXTAUTH_SECRET as string });
+  if (!jwt) throw new Error("Invalid JWT");
+
+  return jwt.access_token as string;
 };
