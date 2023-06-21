@@ -4,7 +4,6 @@ import { type EventExecution } from "../types";
 
 export const execution: EventExecution = async (_, member: GuildMember) => {
   const guild = member.guild;
-  console.log(guild.systemChannel);
 
   const guildData = await prisma.guild.findUnique({
     where: {
