@@ -21,11 +21,11 @@ module.exports = {
   },
   overrides: [
     {
-      files: "apps/web/**",
+      files: ["apps/web/**/*.{ts,tsx}"],
       plugins: ["react", "react-hooks"],
       extends: [
+        "prettier",
         "next/core-web-vitals",
-        "next/babel",
         "plugin:react/recommended",
         "plugin:react-hooks/recommended",
       ],
