@@ -1,10 +1,10 @@
 import { type GetServerSideProps } from "next";
-import Image from "next/image";
 import { useState } from "react";
 import Header from "~/components/Header";
 import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/utils/api";
 import { buildInviteUrl, getGuild, type Guild } from "~/utils/discord";
+import { GuildIcon } from ".";
 
 const GuildPage = ({ guild }: { guild: Guild }) => {
   const { data: guildData } = api.discord.getGuildData.useQuery(guild.id, {
@@ -21,9 +21,7 @@ const GuildPage = ({ guild }: { guild: Guild }) => {
       <Header />
 
       <div className="flex w-full items-center gap-4 rounded bg-gray-800 px-4 py-4">
-        <div className="w-10 overflow-clip rounded-full">
-          <Image height={40} width={40} src={guild.icon} alt="guild icon" />
-        </div>
+        <GuildIcon guild={guild} size={60} />
 
         <h1 className="text-2xl text-gray-300">{guild.name}</h1>
       </div>

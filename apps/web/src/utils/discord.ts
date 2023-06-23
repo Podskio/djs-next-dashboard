@@ -6,13 +6,15 @@ export const DISCORD_ENDPOINT = "https://discord.com/api/v10";
 export interface Guild {
   id: string;
   name: string;
-  icon: string;
+  icon: string | null;
   owner: boolean;
   permissions: string;
 }
 
 // https://discord.com/developers/docs/reference#image-formatting
 export const getGuildIconUrl = (guild: Guild) => {
+  if (!guild.icon) return null;
+
   const format = guild.icon.startsWith("a_") ? "gif" : "png";
   return `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.${format}`;
 };

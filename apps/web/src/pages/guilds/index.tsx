@@ -7,10 +7,27 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/utils/api";
 import { type Guild } from "~/utils/discord";
 
+export const GuildIcon = ({ guild, size }: { guild: Guild; size: number }) =>
+  guild.icon ? (
+    <div className="overflow-clip rounded-full">
+      <Image height={size} width={size} src={guild.icon} alt="guild icon" />
+    </div>
+  ) : (
+    // Guilds without icons
+    <div
+      className="grid place-items-center overflow-clip rounded-full bg-gray-900"
+      style={{ width: `${size}px`, height: `${size}px` }}
+    >
+      <span className="text-xl">
+        {guild.name.split(" ").map((s) => s.charAt(0))}
+      </span>
+    </div>
+  );
+
 const GuildButton = (guild: Guild) => (
   <div className="w-20 overflow-clip rounded-[3rem] shadow transition-all duration-200 hover:rounded-3xl">
     <Link href={`/guilds/${guild.id}`}>
-      <Image height={80} width={80} src={guild.icon} alt="guild icon" />
+      <GuildIcon guild={guild} size={80} />
     </Link>
   </div>
 );
