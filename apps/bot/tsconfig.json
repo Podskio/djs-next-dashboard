@@ -1,8 +1,6 @@
 {
   "extends": "tsconfig/node.json",
   "compilerOptions": {
-    "declaration": false,
-    "declarationMap": false,
     "outDir": "dist"
   },
   "include": ["src"],
