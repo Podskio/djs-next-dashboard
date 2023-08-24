@@ -8,7 +8,7 @@ Built with the [Create T3 App](https://create.t3.gg) stack. Includes a shared [P
 
 ## Dev Setup
 
-1. Fork the repo and clone to your machine
+1. Create your own repo from the template and clone to your machine
 2. Run `pnpm install`
 3. [Create a Discord application](https://discord.com/developers/applications) and retrieve the client id, secret, and bot token
    - Ensure you add OAuth redirects for your environments, both to `/api/auth/callback/discord` and `/guilds`
