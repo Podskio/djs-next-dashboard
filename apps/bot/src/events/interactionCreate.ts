@@ -1,38 +1,74 @@
+import type { ButtonInteraction, CommandInteraction } from "discord.js";
 import { type BaseInteraction } from "discord.js";
-import { readdirSync } from "fs";
+import { existsSync, readdirSync } from "fs";
 import path from "path";
-import { type CommandExecution, type EventExecution } from "../types";
+import { type EventExecution, type InteractionExecution } from "../types";
 
-const commandDirectory = __dirname + "/../commands";
+const interactionTypes = [
+  {
+    interactionType: "commands",
+    validator: (i: BaseInteraction) =>
+      i.isChatInputCommand() || i.isContextMenuCommand(),
+    getId: (i: CommandInteraction) => i.commandName,
+  },
+  {
+    interactionType: "buttons",
+    validator: (i: BaseInteraction) => i.isButton(),
+    getId: (i: ButtonInteraction) => i.customId,
+  },
+  {
+    interactionType: "menus",
+    validator: (i: BaseInteraction) => i.isAnySelectMenu(),
+    getId: (i: ButtonInteraction) => i.customId,
+  },
+  {
+    interactionType: "modals",
+    validator: (i: BaseInteraction) => i.isModalSubmit(),
+    getId: (i: ButtonInteraction) => i.customId,
+  },
+];
 
-const commands: { [key: string]: CommandExecution } = {};
+const interactions = new Map<string, InteractionExecution<BaseInteraction>>();
+const interactionPath = "../interactions";
 
-readdirSync(commandDirectory)
-  .filter((f) => f.slice(-3) === ".js" || f.slice(-3) === ".ts")
-  .map((f) => {
-    const commandName = f.split(".")[0];
+for (const { interactionType } of interactionTypes) {
+  // If there are no interactions in the folder, it will not appear in the build, so check if it exists.
+  if (!existsSync(path.join(__dirname, interactionPath, interactionType)))
+    continue;
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const command = require(path.join(commandDirectory, f));
-    const commandExecution = command.execution as CommandExecution;
+  readdirSync(path.join(__dirname, interactionPath, interactionType))
+    .filter((f) => f.slice(-3) === ".js" || f.slice(-3) === ".ts")
+    .forEach((f) => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const interaction = require(path.join(
+        __dirname,
+        interactionPath,
+        interactionType,
+        f,
+      ));
+      const interactionExecution = interaction.execution;
+      if (!interactionExecution) return;
 
-    commands[commandName] = commandExecution;
-  });
-
-const unimplemented = (interaction: BaseInteraction) => {
-  if (interaction.isRepliable())
-    return interaction.reply({
-      content: "This interaction is not implemented.",
+      interactions.set(
+        `${interactionType}_${f.split(".")[0]}`,
+        interactionExecution,
+      );
     });
-};
+}
 
-export const execution: EventExecution = (
-  client,
-  interaction: BaseInteraction,
-) => {
-  if (interaction.isChatInputCommand()) {
-    if (!commands[interaction.commandName]) return unimplemented(interaction);
+export const execution: EventExecution = (_, interaction: BaseInteraction) => {
+  for (const { interactionType, validator, getId } of interactionTypes) {
+    if (!validator(interaction)) continue;
 
-    commands[interaction.commandName](client, interaction);
-  } else unimplemented(interaction);
+    const id = getId(interaction as never);
+
+    const interactionExecution = interactions.get(`${interactionType}_${id}`);
+    if (interactionExecution) return interactionExecution(interaction);
+
+    if (interaction.isRepliable())
+      return interaction.reply({
+        content: "This interaction is not implemented.",
+        ephemeral: true,
+      });
+  }
 };

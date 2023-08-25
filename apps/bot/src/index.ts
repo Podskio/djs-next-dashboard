@@ -2,14 +2,14 @@ import { Client, GatewayIntentBits } from "discord.js";
 import "dotenv/config";
 import { readdirSync } from "fs";
 import path from "path";
-import { type EventExecution } from "./types";
+import type { EventExecution } from "./types";
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
 });
 
 client.once("ready", () => {
-  console.log(`${client.user?.tag} is online`);
+  console.log(`🤖 ${client.user!.tag} is online`);
 });
 
 const eventDirectory = __dirname + "/events";

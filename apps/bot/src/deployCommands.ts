@@ -4,7 +4,7 @@ import "dotenv/config";
 import { readdirSync } from "fs";
 import path from "path";
 
-const commandDirectory = __dirname + "/commands";
+const commandDirectory = __dirname + "/interactions/commands";
 
 const commands = readdirSync(commandDirectory)
   .filter((f) => f.slice(-3) === ".js" || f.slice(-3) === ".ts")
@@ -13,10 +13,10 @@ const commands = readdirSync(commandDirectory)
 
 const rest = new REST({
   version: "10",
-}).setToken(process.env.DISCORD_BOT_TOKEN!);
+}).setToken(process.env.DISCORD_BOT_TOKEN);
 
 rest
-  .put(Routes.applicationCommands(process.env.DISCORD_CLIENT_ID!), {
+  .put(Routes.applicationCommands(process.env.DISCORD_CLIENT_ID), {
     body: commands,
   })
   .then(() => console.log("✅ Commands deployed"))
