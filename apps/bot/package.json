@@ -9,13 +9,13 @@
   },
   "dependencies": {
     "@discordjs/rest": "^1.7.1",
-    "discord.js": "^14.11.0",
+    "discord.js": "^14.13.0",
     "dotenv": "^16.3.1",
-    "zod": "^3.21.4"
+    "zod": "^3.22.2"
   },
   "devDependencies": {
     "tsconfig": "workspace:*",
-    "tsx": "^3.12.7",
-    "typescript": "^5.1.6"
+    "tsx": "^3.12.8",
+    "typescript": "^5.2.2"
   }
 }
